@@ -1,0 +1,11 @@
+.Tilt {
+    width: 150px;
+    height: 150px;
+    background: linear-gradient(89deg, #04C8DE  0%, #FF5EDF  100%);
+}
+
+.logo {
+    height: 110px;
+    width: 110px;
+    padding: 20px 20px 20px 20px
+}
