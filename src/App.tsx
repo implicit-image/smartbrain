@@ -1,116 +1,126 @@
-import React, { useState } from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React, { ChangeEvent, MouseEvent, useEffect, useState } from 'react'
+import './App.css'
 
-import Particles, { IOptions, RecursivePartial } from 'react-tsparticles'
+//@ts-ignore
+import Clarifai from 'clarifai'
+import { BoundingBox, BoxCoords } from './types'
 
 import Navigation from './components/Navigation/Navigation'
 import Logo from './components/Logo/Logo'
 import ImageUrlForm from './components/ImageUrlForm/ImageUrlForm'
 import Rank from './components/Rank/Rank'
+import FaceRecognition from './components/FaceRecognition/FaceRecognition'
 
-const particleOptions = {
-  background: {
-    color: {
-      /* value: "#0d47a1", */
-    },
-  },
-  fpsLimit: 60,
-  interactivity: {
-    detectsOn: "canvas",
-    events: {
-      onClick: {
-        enable: true,
-        mode: "push",
-      },
-      onHover: {
-        enable: true,
-        mode: "repulse",
-      },
-      resize: true,
-    },
-    modes: {
-      bubble: {
-        distance: 400,
-        duration: 2,
-        opacity: 0.8,
-        size: 40,
-      },
-      push: {
-        quantity: 4,
-      },
-      repulse: {
-        distance: 200,
-        duration: 0.4,
-      },
-    },
-  },
-  particles: {
-    color: {
-      value: "#ffffff",
-    },
-    links: {
-      color: "#ffffff",
-      distance: 150,
-      enable: true,
-      opacity: 0.5,
-      width: 1,
-    },
-    collisions: {
-      enable: true,
-    },
-    move: {
-      direction: "none",
-      enable: true,
-      outMode: "bounce",
-      random: false,
-      speed: 6,
-      straight: false,
-    },
-    number: {
-      density: {
-        enable: true,
-        value_area: 800,
-      },
-      value: 80,
-    },
-    opacity: {
-      value: 0.0,
-    },
-    shape: {
-      type: "circle",
-    },
-    size: {
-      random: true,
-      value: 5,
-    },
-  },
-  detectRetina: true,
-} as RecursivePartial<IOptions>
 
+import Particles from 'react-tsparticles'
+import particleOptions from './ParticleOptions'
 
 
 const App = () => {
 
+  const [route, setRoute] = useState('/')
+
+  const [imgUrl, setImgUrl] = useState('')
+
+  const [modelId, setModelId] = useState('f76196b43bbd45c99b4f3cd8e8b40a8a')
+
+  const [boxes, setBoxes] = useState([{
+    bottom_row: 0,
+    left_column: 0,
+    right_column: 0,
+    top_row: 0
+  }] as Array<BoxCoords>)
+
+
+  const api_key ='df0af5a5ac054d45ad0e827befb9b91c'
+
+  const app = new Clarifai.App({
+    apiKey: api_key
+  })
+
+
+
+
+
+  const handleUrlSubmit = (event: MouseEvent<HTMLButtonElement>): void => {
+
+    /*
+       https://samples.clarifai.com/face-det.jpg
+    */
+    const url = (document.getElementById('url-input') as HTMLInputElement)!.value
+
+    setImgUrl(url)
+
+    app.models
+       .predict(modelId, url)
+       .then((res: any) => {
+         setBoxes(
+           res.outputs[0].data.regions
+              .map((r: any) =>
+                calculateBoxPosition(r.region_info.bounding_box)))
+       })
+       .catch((err: Error) => {
+         setBoxes([])
+       })
+  }
+
+  // BoundingBox represents type of an object im interested in extracting from
+  // the response.
+  // BoxCoords represents calculated from BoundingBox values relative to img size
+  const calculateBoxPosition = (positions: BoundingBox): BoxCoords => {
+
+    const id='inputImage'
+    const img = document.getElementById(id) as HTMLImageElement
+
+
+    //if getting element fails img is null
+    if  (img) {
+      const width = img.width
+      const height = img.height
+
+      const result = ({
+        bottom_row: height - (positions.bottom_row * height),
+        left_column: positions.left_col * width,
+        right_column: width - (positions.right_col * width),
+        top_row: positions.top_row * height
+      } as BoxCoords)
+
+      return result
+
+    } else {
+      throw Error(`target id was: ${id}`)
+    }
+  }
 
 
 
   return (
     <div className="App">
-        <Particles
+      <Particles
         id="tsparticles"
         init={() => 0}
         loaded={() => 0}
         options={particleOptions}
-        className='particles'
       />
+
+      {/* TODO: add some page changing logic later*/ }
       <Navigation />
       <Logo />
       <Rank />
-      <ImageUrlForm />
-      {/* <FaceRecognition/> */}
+      <ImageUrlForm
+        onUrlSubmit={handleUrlSubmit}
+      />
+      {
+        imgUrl.length !== 0 ?
+        <FaceRecognition
+          url={imgUrl}
+          boxes={boxes}
+        />
+        : <div></div>
+      }
     </div>
   )
 }
 
-export default App;
+
+export default App
