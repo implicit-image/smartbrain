@@ -1,4 +1,4 @@
-import React, { ChangeEvent, MouseEvent, useEffect, useState } from 'react'
+import React, { MouseEvent, useEffect, useState } from 'react'
 import './App.css'
 
 //@ts-ignore
@@ -62,6 +62,8 @@ const App = () => {
        .catch((err: Error) => {
          setBoxes([])
        })
+
+    document.getElementById('inputImage')?.scrollIntoView({behavior: 'smooth'})
   }
 
   // BoundingBox represents type of an object im interested in extracting from
@@ -78,14 +80,12 @@ const App = () => {
       const width = img.width
       const height = img.height
 
-      const result = ({
+      return({
         bottom_row: height - (positions.bottom_row * height),
         left_column: positions.left_col * width,
         right_column: width - (positions.right_col * width),
         top_row: positions.top_row * height
       } as BoxCoords)
-
-      return result
 
     } else {
       throw Error(`target id was: ${id}`)
