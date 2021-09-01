@@ -3,13 +3,15 @@ import './App.css'
 
 //@ts-ignore
 import Clarifai from 'clarifai'
-import { BoundingBox, BoxCoords } from './types'
+import { BoundingBox, BoxCoords, Route } from './types'
 
 import Navigation from './components/Navigation/Navigation'
 import Logo from './components/Logo/Logo'
 import ImageUrlForm from './components/ImageUrlForm/ImageUrlForm'
 import Rank from './components/Rank/Rank'
 import FaceRecognition from './components/FaceRecognition/FaceRecognition'
+import SignIn from './components/SignIn/SignIn'
+import SignUp from './components/SignUp/SignUp'
 
 
 import Particles from 'react-tsparticles'
@@ -18,7 +20,9 @@ import particleOptions from './ParticleOptions'
 
 const App = () => {
 
-  const [route, setRoute] = useState('/')
+
+
+  const [route, setRoute] = useState(Route.SIGN_IN)
 
   const [imgUrl, setImgUrl] = useState('')
 
@@ -74,7 +78,6 @@ const App = () => {
     const id='inputImage'
     const img = document.getElementById(id) as HTMLImageElement
 
-
     //if getting element fails img is null
     if  (img) {
       const width = img.width
@@ -103,20 +106,37 @@ const App = () => {
         options={particleOptions}
       />
 
-      {/* TODO: add some page changing logic later*/ }
-      <Navigation />
-      <Logo />
-      <Rank />
-      <ImageUrlForm
-        onUrlSubmit={handleUrlSubmit}
+      <Navigation
+        goSignIn={() => setRoute(Route.SIGN_IN)}
+        goSignUp={() => setRoute(Route.SIGN_UP)}
+        isSignedUp={route === Route.HOME}
       />
+
+      <Logo />
       {
-        imgUrl.length !== 0 ?
-        <FaceRecognition
-          url={imgUrl}
-          boxes={boxes}
-        />
-        : <div></div>
+        route === Route.SIGN_IN
+        ? <SignIn
+            goHome={() => setRoute(Route.HOME)}
+            goSignUp={() => setRoute(Route.SIGN_UP)}/>
+        : route === Route.SIGN_UP
+        ? <SignUp
+            goHome={() => setRoute(Route.HOME)}
+            goSignIn={() => setRoute(Route.SIGN_IN)}/>
+        :
+        <>
+          <Rank />
+          <ImageUrlForm
+            onUrlSubmit={handleUrlSubmit}
+          />
+          {
+            imgUrl.length !== 0 ?
+            <FaceRecognition
+              url={imgUrl}
+              boxes={boxes}
+            />
+            : <div></div>
+          }
+        </>
       }
     </div>
   )

@@ -16,6 +16,16 @@ interface BoxCoords {
   bottom_row: number,
   left_column: number
 }
+
+
+export enum Route {
+  HOME,
+  SIGN_IN,
+  SIGN_UP
+}
+
+
+
 export type {
   BoundingBox,
   BoxCoords
