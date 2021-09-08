@@ -1,15 +1,20 @@
 import React from 'react'
 import './../../App.css'
+import { User } from '../../types'
+
+interface Props {
+  user: User
+}
 
 
-const Rank = () => {
+const Rank = ( { user }: Props) => {
   return (
     <div>
       <div className='white f3'>
-        {'Błażej, your current rank is'}
+        {`${user.name}, your current rank is`}
       </div>
       <div className='white f1'>
-        {'#5'}
+        {`#${user.entries}`}
       </div>
     </div>
   )

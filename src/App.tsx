@@ -3,7 +3,7 @@ import './App.css'
 
 //@ts-ignore
 import Clarifai from 'clarifai'
-import { BoundingBox, BoxCoords, Route } from './types'
+import { BoundingBox, BoxCoords, Route, User } from './types'
 
 import Navigation from './components/Navigation/Navigation'
 import Logo from './components/Logo/Logo'
@@ -35,6 +35,16 @@ const App = () => {
     top_row: 0
   }] as Array<BoxCoords>)
 
+  const [user, setUser] = useState({
+    id: '',
+    name: '',
+    email: '',
+    password: '',
+    entries: 0,
+    joined: ''
+  } as User)
+
+  const [isSignedIn, setIsSignedIn] = useState(false)
 
   const api_key ='df0af5a5ac054d45ad0e827befb9b91c'
 
@@ -42,7 +52,17 @@ const App = () => {
     apiKey: api_key
   })
 
-
+  const loadUser = (data: any) => {
+    setUser({
+      id: data.id,
+      name: data.name,
+      email: data.email,
+      password: data.password,
+      entries: data.entries,
+      joined: data.joined
+    })
+    setIsSignedIn(true)
+  }
 
 
 
@@ -109,7 +129,7 @@ const App = () => {
       <Navigation
         goSignIn={() => setRoute(Route.SIGN_IN)}
         goSignUp={() => setRoute(Route.SIGN_UP)}
-        isSignedUp={route === Route.HOME}
+        isSignedUp={isSignedIn}
       />
 
       <Logo />
@@ -117,14 +137,16 @@ const App = () => {
         route === Route.SIGN_IN
         ? <SignIn
             goHome={() => setRoute(Route.HOME)}
-            goSignUp={() => setRoute(Route.SIGN_UP)}/>
+            goSignUp={() => setRoute(Route.SIGN_UP)}
+            loadUser={loadUser}/>
         : route === Route.SIGN_UP
         ? <SignUp
             goHome={() => setRoute(Route.HOME)}
-            goSignIn={() => setRoute(Route.SIGN_IN)}/>
+            goSignIn={() => setRoute(Route.SIGN_IN)}
+            loadUser={loadUser}/>
         :
         <>
-          <Rank />
+          <Rank user={user}/>
           <ImageUrlForm
             onUrlSubmit={handleUrlSubmit}
           />

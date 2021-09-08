@@ -1,5 +1,3 @@
-import { type } from 'os'
-import React from 'react'
 
 
 interface BoundingBox {
@@ -17,6 +15,14 @@ interface BoxCoords {
   left_column: number
 }
 
+interface User {
+  id: string,
+  name: string,
+  email: string,
+  password: string,
+  entries: number,
+  joined: string
+}
 
 export enum Route {
   HOME,
@@ -28,5 +34,6 @@ export enum Route {
 
 export type {
   BoundingBox,
-  BoxCoords
+  BoxCoords,
+  User
 }

@@ -1,4 +1,4 @@
-import React, { ChangeEvent, HtmlHTMLAttributes, MouseEvent } from 'react'
+import React, { MouseEvent } from 'react'
 import './../../App.css'
 import './ImageUrlForm.css'
 
