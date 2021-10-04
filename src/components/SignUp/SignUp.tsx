@@ -39,7 +39,7 @@ const SignUp = ({ goHome, goSignIn, loadUser }: Props) => {
         loadUser(data.user)
         goHome()
       } else {
-        console.log("error signing up")
+        throw Error("error signing up")
       }
     })
   }

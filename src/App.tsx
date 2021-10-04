@@ -3,7 +3,7 @@ import './App.css'
 
 //@ts-ignore
 import Clarifai from 'clarifai'
-import { BoundingBox, BoxCoords, Route, User } from './types'
+import { BoxCoords, Route, User } from './types'
 
 import Navigation from './components/Navigation/Navigation'
 import Logo from './components/Logo/Logo'
@@ -46,8 +46,9 @@ const App = () => {
 
   const [isSignedIn, setIsSignedIn] = useState(false)
 
-  const api_key ='df0af5a5ac054d45ad0e827befb9b91c'
-
+  const api_key ="df0af5a5ac054d45ad0e827befb9b91c"
+    /* process.env.REACT_APP_CLARIFAI_API_KEY
+                   */
   const app = new Clarifai.App({
     apiKey: api_key
   })
@@ -77,11 +78,25 @@ const App = () => {
 
     app.models
        .predict(modelId, url)
-       .then((res: any) => {
-         setBoxes(
-           res.outputs[0].data.regions
-              .map((r: any) =>
-                calculateBoxPosition(r.region_info.bounding_box)))
+       .then((response: any) => {
+
+         if (response) {
+
+           setBoxes(calculateBoxCoords(response))
+
+           fetch(
+             'http://localhost:3001/image',
+             {
+               method: 'put',
+               headers: { 'Content-Type': 'application/json' },
+               body: JSON.stringify({ id: user.id })
+           })
+         }
+       })
+       .then((response: any) => {
+         if (response) {
+           loadUser(response.user)
+         }
        })
        .catch((err: Error) => {
          setBoxes([])
@@ -90,26 +105,38 @@ const App = () => {
     document.getElementById('inputImage')?.scrollIntoView({behavior: 'smooth'})
   }
 
-  // BoundingBox represents type of an object im interested in extracting from
-  // the response.
-  // BoxCoords represents calculated from BoundingBox values relative to img size
-  const calculateBoxPosition = (positions: BoundingBox): BoxCoords => {
 
-    const id='inputImage'
+  const handleSignOut = () => {
+    setRoute(Route.SIGN_IN)
+    setImgUrl("")
+    setBoxes([])
+    setIsSignedIn(false)
+  }
+
+  // BoxCoords represents calculated from BoundingBox values relative to img size
+  const calculateBoxCoords = (response: any): BoxCoords[] => {
+
+    const id = 'inputImage'
     const img = document.getElementById(id) as HTMLImageElement
+
 
     //if getting element fails img is null
     if  (img) {
+
       const width = img.width
       const height = img.height
 
-      return({
-        bottom_row: height - (positions.bottom_row * height),
-        left_column: positions.left_col * width,
-        right_column: width - (positions.right_col * width),
-        top_row: positions.top_row * height
-      } as BoxCoords)
+      const regions = response.outputs[0].data.regions.map((r: any) => {
+        const info = r.region_info.bounding_box
+        return({
+          bottom_row: height - (info.bottom_row * height),
+          left_column: info.left_col * width,
+          right_column: width - (info.right_col * width),
+          top_row: info.top_row * height
+        } as BoxCoords)
 
+      })
+      return regions
     } else {
       throw Error(`target id was: ${id}`)
     }
@@ -129,36 +156,42 @@ const App = () => {
       <Navigation
         goSignIn={() => setRoute(Route.SIGN_IN)}
         goSignUp={() => setRoute(Route.SIGN_UP)}
+        onSignOut={handleSignOut}
         isSignedUp={isSignedIn}
       />
 
       <Logo />
       {
         route === Route.SIGN_IN
-        ? <SignIn
+        ?
+          <SignIn
             goHome={() => setRoute(Route.HOME)}
             goSignUp={() => setRoute(Route.SIGN_UP)}
-            loadUser={loadUser}/>
+            loadUser={loadUser}
+          />
         : route === Route.SIGN_UP
-        ? <SignUp
+        ?
+          <SignUp
             goHome={() => setRoute(Route.HOME)}
             goSignIn={() => setRoute(Route.SIGN_IN)}
-            loadUser={loadUser}/>
-        :
-        <>
-          <Rank user={user}/>
-          <ImageUrlForm
-            onUrlSubmit={handleUrlSubmit}
+            loadUser={loadUser}
           />
-          {
-            imgUrl.length !== 0 ?
-            <FaceRecognition
-              url={imgUrl}
-              boxes={boxes}
+        :
+          <>
+            <Rank user={user}/>
+            <ImageUrlForm
+              onUrlSubmit={handleUrlSubmit}
             />
-            : <div></div>
-          }
-        </>
+            {
+              imgUrl.length !== 0
+              ?
+                <FaceRecognition
+                  url={imgUrl}
+                  boxes={boxes}
+                />
+              : <div></div>
+            }
+          </>
       }
     </div>
   )

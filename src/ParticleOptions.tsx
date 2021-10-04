@@ -64,7 +64,7 @@ const particleOptions = {
         enable: true,
         value_area: 80,
       },
-      value: 10,
+      value: 7,
     },
     opacity: {
       value: 0.0,

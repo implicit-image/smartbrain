@@ -32,12 +32,11 @@ const SignIn = ({ goHome, goSignUp, loadUser }: Props) => {
     })
     .then(res => res.json())
     .then(data => {
-      console.log(data)
       if (data.status === "success") {
         loadUser(data.user)
         goHome()
       } else {
-        console.log("error logging in")
+        throw Error("problem logging in")
       }
     })
   }
