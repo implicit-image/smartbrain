@@ -1,18 +1,12 @@
-import React, { MouseEvent, useEffect, useState } from 'react'
+import react, { MouseEvent, useEffect, useState } from 'react'
 import './App.css'
 
 //@ts-ignore
-import Clarifai from 'clarifai'
 import { BoxCoords, Route, User } from './types'
 
 import Navigation from './components/Navigation/Navigation'
 import Logo from './components/Logo/Logo'
-import ImageUrlForm from './components/ImageUrlForm/ImageUrlForm'
-import Rank from './components/Rank/Rank'
-import FaceRecognition from './components/FaceRecognition/FaceRecognition'
-import SignIn from './components/SignIn/SignIn'
-import SignUp from './components/SignUp/SignUp'
-
+import Main from './components/Main/Main'
 
 import Particles from 'react-tsparticles'
 import particleOptions from './ParticleOptions'
@@ -21,19 +15,13 @@ import particleOptions from './ParticleOptions'
 const App = () => {
 
 
-
   const [route, setRoute] = useState(Route.SIGN_IN)
 
   const [imgUrl, setImgUrl] = useState('')
 
   const [modelId, setModelId] = useState('f76196b43bbd45c99b4f3cd8e8b40a8a')
 
-  const [boxes, setBoxes] = useState([{
-    bottom_row: 0,
-    left_column: 0,
-    right_column: 0,
-    top_row: 0
-  }] as Array<BoxCoords>)
+  const [boxes, setBoxes] = useState([] as Array<BoxCoords>)
 
   const [user, setUser] = useState({
     id: '',
@@ -44,28 +32,16 @@ const App = () => {
     joined: ''
   } as User)
 
+
   const [isSignedIn, setIsSignedIn] = useState(false)
+  const [serverUrl, setServerUrl] = useState("http://localhost:3001")
 
-  const api_key ="df0af5a5ac054d45ad0e827befb9b91c"
-    /* process.env.REACT_APP_CLARIFAI_API_KEY
-                   */
-  const app = new Clarifai.App({
-    apiKey: api_key
-  })
 
-  const loadUser = (data: any) => {
-    setUser({
-      id: data.id,
-      name: data.name,
-      email: data.email,
-      password: data.password,
-      entries: data.entries,
-      joined: data.joined
-    })
-    setIsSignedIn(true)
+  const loadUser = (user: User) => {
+    setUser(user)
+    if (!isSignedIn)
+      setIsSignedIn(true)
   }
-
-
 
   const handleUrlSubmit = (event: MouseEvent<HTMLButtonElement>): void => {
 
@@ -76,33 +52,22 @@ const App = () => {
 
     setImgUrl(url)
 
-    app.models
-       .predict(modelId, url)
-       .then((response: any) => {
-
-         if (response) {
-
-           setBoxes(calculateBoxCoords(response))
-
-           fetch(
-             'http://localhost:3001/image',
-             {
-               method: 'put',
-               headers: { 'Content-Type': 'application/json' },
-               body: JSON.stringify({ id: user.id })
-           })
-         }
-       })
-       .then((response: any) => {
-         if (response) {
-           loadUser(response.user)
-         }
-       })
-       .catch((err: Error) => {
-         setBoxes([])
-       })
-
-    document.getElementById('inputImage')?.scrollIntoView({behavior: 'smooth'})
+    fetch(
+      'http://localhost:3001/image',
+      {
+        method: 'put',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: user.id, url: url, modelId: modelId })
+      })
+    .then((data: Response) => {
+      if (data.ok) {
+        setBoxes(calculateBoxCoords(data))
+        document.getElementById('inputImage')?.scrollIntoView({behavior: 'smooth'})
+      }
+    })
+    .catch((err: Error) => {
+      console.log(err)
+    })
   }
 
 
@@ -122,7 +87,7 @@ const App = () => {
 
     //if getting element fails img is null
     if  (img) {
-
+      // shortcuts for convienience
       const width = img.width
       const height = img.height
 
@@ -138,6 +103,7 @@ const App = () => {
       })
       return regions
     } else {
+      // temporary, TODO handle incorrect image id
       throw Error(`target id was: ${id}`)
     }
   }
@@ -161,41 +127,22 @@ const App = () => {
       />
 
       <Logo />
-      {
-        route === Route.SIGN_IN
-        ?
-          <SignIn
-            goHome={() => setRoute(Route.HOME)}
-            goSignUp={() => setRoute(Route.SIGN_UP)}
-            loadUser={loadUser}
-          />
-        : route === Route.SIGN_UP
-        ?
-          <SignUp
-            goHome={() => setRoute(Route.HOME)}
-            goSignIn={() => setRoute(Route.SIGN_IN)}
-            loadUser={loadUser}
-          />
-        :
-          <>
-            <Rank user={user}/>
-            <ImageUrlForm
-              onUrlSubmit={handleUrlSubmit}
-            />
-            {
-              imgUrl.length !== 0
-              ?
-                <FaceRecognition
-                  url={imgUrl}
-                  boxes={boxes}
-                />
-              : <div></div>
-            }
-          </>
-      }
+
+      <Main
+        route={route}
+        setRoute={setRoute}
+        loadUser={loadUser}
+        handleUrlSubmit={handleUrlSubmit}
+        url={imgUrl}
+        boxes={boxes}
+        user={user}
+      />
     </div>
   )
 }
 
 
 export default App
+
+
+

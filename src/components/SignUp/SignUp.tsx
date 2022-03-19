@@ -14,6 +14,7 @@ const SignUp = ({ goHome, goSignIn, loadUser }: Props) => {
     email: '',
     password: ''
   })
+// TODO collapse these three to one function
 
   const handleNameChange = (event: ChangeEvent<HTMLInputElement>) => {
     setCreds({ ...creds, name: event.target.value })
@@ -35,13 +36,14 @@ const SignUp = ({ goHome, goSignIn, loadUser }: Props) => {
     })
     .then(res => res.json())
     .then(data => {
-      if (data.status === "success") {
-        loadUser(data.user)
+      if (data.ok) {
+        loadUser(data)
         goHome()
       } else {
-        throw Error("error signing up")
-      }
-    })
+        console.log('signing up failed', data)
+      }}
+    )
+    .catch((err: Error) => console.log("error signing up:\n", err))
   }
 
 
@@ -113,6 +115,5 @@ const SignUp = ({ goHome, goSignIn, loadUser }: Props) => {
   )
 
 }
-
 
 export default SignUp

@@ -32,13 +32,15 @@ const SignIn = ({ goHome, goSignUp, loadUser }: Props) => {
     })
     .then(res => res.json())
     .then(data => {
-      if (data.status === "success") {
-        loadUser(data.user)
+      if (data.ok) {
+        loadUser(data)
         goHome()
       } else {
-        throw Error("problem logging in")
+        console.log('error signing in ', data)
       }
-    })
+    }
+    )
+    .catch((err: Error) => console.log("error signing in:\n", err))
   }
 
   return (

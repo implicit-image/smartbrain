@@ -10,21 +10,23 @@ interface Props {
 }
 
 const FaceRecognition = ({ url, boxes }: Props) => {
+  if (url.length === 0) {
+    return <></>
+  } else {
+    return (
+      <div className='pa3 center ma'>
+        <div className='absolute mt2'>
+          <img id='inputImage' src={url} alt="" style={{width: '500px', height: 'auto'}} />
+          { boxes.length > 0 ?
+                           boxes.map((box: BoxCoords, i: number) =>
+                             <FaceBox box={box} key={i}/>)
+                         : <div></div>
+          }
 
-
-  return (
-    <div className='pa3 center ma'>
-      <div className='absolute mt2'>
-        <img id='inputImage' src={url} alt="" style={{width: '500px', height: 'auto'}} />
-        { boxes.length > 0 ?
-            boxes.map((box: BoxCoords, i: number) =>
-              <FaceBox box={box} key={i}/>)
-          : <div></div>
-        }
-
+        </div>
       </div>
-    </div>
-  )
+    )
+  }
 }
 
 
