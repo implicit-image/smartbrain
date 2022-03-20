@@ -1,5 +1,7 @@
 import React, { ChangeEvent, useState } from 'react'
 
+import '../../global.css'
+
 
 interface Props {
   goHome: () => void,
@@ -8,6 +10,8 @@ interface Props {
 }
 
 const SignIn = ({ goHome, goSignUp, loadUser }: Props) => {
+
+  const [authOK, setAuthOK] = useState(true)
 
   const [email, setEmail] = useState('')
 
@@ -30,17 +34,29 @@ const SignIn = ({ goHome, goSignUp, loadUser }: Props) => {
         password: password
       })
     })
-    .then(res => res.json())
-    .then(data => {
-      if (data.ok) {
-        loadUser(data)
-        goHome()
+    .then(res => {
+      if (res.ok) {
+        return res.json()
       } else {
-        console.log('error signing in ', data)
+        //TODO auth color inicaator
+        setAuthOK(false)
+        throw new Error('error signing in')
       }
-    }
-    )
-    .catch((err: Error) => console.log("error signing in:\n", err))
+    })
+    .then(user => {
+      loadUser(user)
+      goHome()
+    })
+    .catch((err: Error) => {
+      console.log("error signing in:\n", err)
+
+      const erroredFields = document.getElementsByTagName('input')
+      for (let i = 0; i <= erroredFields.length; i = i + 1) {
+        if (erroredFields.item(i)?.type != 'submit')
+          erroredFields.item(i)?.classList.add('error')
+      }
+
+    })
   }
 
   return (

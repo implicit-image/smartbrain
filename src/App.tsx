@@ -27,7 +27,6 @@ const App = () => {
     id: '',
     name: '',
     email: '',
-    password: '',
     entries: 0,
     joined: ''
   } as User)
@@ -53,17 +52,24 @@ const App = () => {
     setImgUrl(url)
 
     fetch(
-      'http://localhost:3001/image',
+      `${serverUrl}/image`,
       {
         method: 'put',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ id: user.id, url: url, modelId: modelId })
       })
-    .then((data: Response) => {
+    .then((data: any) => {
       if (data.ok) {
-        setBoxes(calculateBoxCoords(data))
-        document.getElementById('inputImage')?.scrollIntoView({behavior: 'smooth'})
+        return data.json()
+      } else {
+        throw new Error(`ERROR GETTING IMAGE DATA BACK: \n ${data}` )
       }
+    })
+    .then(data => {
+        console.log(data)
+        setBoxes(calculateBoxCoords(data.response))
+        setUser(data.user)
+        document.getElementById('inputImage')?.scrollIntoView({behavior: 'smooth'})
     })
     .catch((err: Error) => {
       console.log(err)
@@ -124,6 +130,7 @@ const App = () => {
         goSignUp={() => setRoute(Route.SIGN_UP)}
         onSignOut={handleSignOut}
         isSignedUp={isSignedIn}
+        route={route}
       />
 
       <Logo />

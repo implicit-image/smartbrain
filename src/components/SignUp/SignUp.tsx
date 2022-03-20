@@ -1,4 +1,8 @@
-import React, { ChangeEvent, useState } from 'react'
+import react, { ChangeEvent, useState } from 'react'
+
+
+import '../../global.css'
+
 
 interface Props {
   goHome: () => void,
@@ -14,18 +18,15 @@ const SignUp = ({ goHome, goSignIn, loadUser }: Props) => {
     email: '',
     password: ''
   })
-// TODO collapse these three to one function
 
-  const handleNameChange = (event: ChangeEvent<HTMLInputElement>) => {
-    setCreds({ ...creds, name: event.target.value })
-  }
+  const [authOK, setAuthOK] = useState(true)
 
-  const handleEmailChange = (event: ChangeEvent<HTMLInputElement>) => {
-    setCreds({ ...creds, email: event.target.value })
-  }
 
-  const handlePasswordChange = (event: ChangeEvent<HTMLInputElement>) => {
-    setCreds({ ...creds, password: event.target.value })
+
+  const handleCredChange = (event: ChangeEvent<HTMLInputElement>, credName: string) => {
+    const temp: any = creds
+    temp[`${credName}`] = event.target.value
+    setCreds(temp)
   }
 
   const handleSubmitSignUp = () => {
@@ -34,16 +35,26 @@ const SignUp = ({ goHome, goSignIn, loadUser }: Props) => {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(creds)
     })
-    .then(res => res.json())
-    .then(data => {
-      if (data.ok) {
-        loadUser(data)
-        goHome()
+    .then(res => {
+      if (res.ok) { // should not pass if status is 400
+        console.log(res)
+        return res.json()
       } else {
-        console.log('signing up failed', data)
-      }}
-    )
-    .catch((err: Error) => console.log("error signing up:\n", err))
+        setAuthOK(false)
+        throw new Error(JSON.stringify(res.body))
+      }
+    })
+    .then(data => {
+      loadUser(data)
+      goHome()
+    })
+    .catch((err: Error) => {
+      const erroredFields = document.getElementsByTagName('input')
+      for (let i = 0; i <= erroredFields.length; i = i + 1) {
+        if (erroredFields.item(i)?.type != 'submit')
+          erroredFields.item(i)?.classList.add('error')
+      }
+    })
   }
 
 
@@ -64,7 +75,7 @@ const SignUp = ({ goHome, goSignIn, loadUser }: Props) => {
                 type="email"
                 name="email-address"
                 id="email-address"
-                onChange={handleEmailChange}
+                onChange={(e) => handleCredChange(e, 'email')}
               />
             </div>
              <div className="mt3">
@@ -76,7 +87,7 @@ const SignUp = ({ goHome, goSignIn, loadUser }: Props) => {
                 type="text"
                 name="name"
                 id="name"
-                onChange={handleNameChange}
+                onChange={(e) => handleCredChange(e, 'name')}
               />
             </div>
             <div className="mv3">
@@ -88,7 +99,7 @@ const SignUp = ({ goHome, goSignIn, loadUser }: Props) => {
                 type="password"
                 name="password"
                 id="password"
-                onChange={handlePasswordChange}
+                onChange={(e) => handleCredChange(e, 'password')}
               />
             </div>
           </fieldset>

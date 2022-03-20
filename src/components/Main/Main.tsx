@@ -8,6 +8,7 @@ import FaceRecognition from '../FaceRecognition/FaceRecognition'
 
 
 
+
 interface Props {
   route: Route,
   setRoute: Dispatch<SetStateAction<Route>>,
@@ -27,7 +28,8 @@ const Main = ({ route, setRoute, loadUser, handleUrlSubmit, url, boxes, user }: 
         loadUser={loadUser}
       />
     )
-  } else if (route === Route.SIGN_UP) {
+  }
+  else if (route === Route.SIGN_UP) {
     return(
       <SignUp
         goHome={() => setRoute(Route.HOME)}
@@ -35,7 +37,8 @@ const Main = ({ route, setRoute, loadUser, handleUrlSubmit, url, boxes, user }: 
         loadUser={loadUser}
       />
     )
-  } else {
+  }
+  else if (route === Route.HOME) {
     return(
       <>
         <Rank user={user}/>
@@ -47,6 +50,11 @@ const Main = ({ route, setRoute, loadUser, handleUrlSubmit, url, boxes, user }: 
           boxes={boxes}
         />
       </>
+    )
+  }
+  else {
+    return(
+      <div></div>
     )
   }
 }
