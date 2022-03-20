@@ -16,16 +16,18 @@ interface Props {
   handleUrlSubmit: (u: MouseEvent<HTMLButtonElement>) => void,
   url: string,
   boxes: Array<BoxCoords>,
-  user: User
+  user: User,
+  serverUrl: string
 }
 
-const Main = ({ route, setRoute, loadUser, handleUrlSubmit, url, boxes, user }: Props) => {
+const Main = ({ route, setRoute, loadUser, handleUrlSubmit, url, boxes, user, serverUrl }: Props) => {
   if (route === Route.SIGN_IN) {
     return(
       <SignIn
         goHome={() => setRoute(Route.HOME)}
         goSignUp={() => setRoute(Route.SIGN_UP)}
         loadUser={loadUser}
+        serverUrl={serverUrl}
       />
     )
   }
@@ -35,6 +37,7 @@ const Main = ({ route, setRoute, loadUser, handleUrlSubmit, url, boxes, user }: 
         goHome={() => setRoute(Route.HOME)}
         goSignIn={() => setRoute(Route.SIGN_IN)}
         loadUser={loadUser}
+        serverUrl={serverUrl}
       />
     )
   }

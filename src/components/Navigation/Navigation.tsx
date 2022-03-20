@@ -39,7 +39,7 @@ const Navigation = ({ goSignIn, goSignUp, onSignOut, isSignedUp, route }: Props)
       <nav
         style={{display: 'flex', justifyContent: 'flex-end'}}
       >
-        { route == Route.SIGN_UP
+        { route === Route.SIGN_UP
           ?
           <p
             className='f3 link dim black underline pa3 pointer'

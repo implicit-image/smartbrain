@@ -8,19 +8,17 @@ interface Props {
   goHome: () => void,
   goSignIn: () => void,
   loadUser: (u: any) => void,
+  serverUrl: string
 }
 
 
-const SignUp = ({ goHome, goSignIn, loadUser }: Props) => {
+const SignUp = ({ goHome, goSignIn, loadUser, serverUrl }: Props) => {
 
   const [creds, setCreds] = useState({
     name: '',
     email: '',
     password: ''
   })
-
-  const [authOK, setAuthOK] = useState(true)
-
 
 
   const handleCredChange = (event: ChangeEvent<HTMLInputElement>, credName: string) => {
@@ -30,7 +28,7 @@ const SignUp = ({ goHome, goSignIn, loadUser }: Props) => {
   }
 
   const handleSubmitSignUp = () => {
-    fetch('http://localhost:3001/signup', {
+    fetch(`${serverUrl}/signup`, {
       method: 'post',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(creds)
@@ -40,7 +38,6 @@ const SignUp = ({ goHome, goSignIn, loadUser }: Props) => {
         console.log(res)
         return res.json()
       } else {
-        setAuthOK(false)
         throw new Error(JSON.stringify(res.body))
       }
     })
@@ -51,7 +48,7 @@ const SignUp = ({ goHome, goSignIn, loadUser }: Props) => {
     .catch((err: Error) => {
       const erroredFields = document.getElementsByTagName('input')
       for (let i = 0; i <= erroredFields.length; i = i + 1) {
-        if (erroredFields.item(i)?.type != 'submit')
+        if (erroredFields.item(i)?.type !== 'submit')
           erroredFields.item(i)?.classList.add('error')
       }
     })

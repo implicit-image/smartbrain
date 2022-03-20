@@ -1,4 +1,4 @@
-import react, { MouseEvent, useEffect, useState } from 'react'
+import react, { MouseEvent, useState } from 'react'
 import './App.css'
 
 //@ts-ignore
@@ -143,6 +143,7 @@ const App = () => {
         url={imgUrl}
         boxes={boxes}
         user={user}
+        serverUrl={serverUrl}
       />
     </div>
   )

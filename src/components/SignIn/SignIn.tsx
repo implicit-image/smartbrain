@@ -6,10 +6,11 @@ import '../../global.css'
 interface Props {
   goHome: () => void,
   goSignUp: () => void,
-  loadUser: (u: any) => void
+  loadUser: (u: any) => void,
+  serverUrl: string
 }
 
-const SignIn = ({ goHome, goSignUp, loadUser }: Props) => {
+const SignIn = ({ goHome, goSignUp, loadUser, serverUrl }: Props) => {
 
   const [authOK, setAuthOK] = useState(true)
 
@@ -26,7 +27,7 @@ const SignIn = ({ goHome, goSignUp, loadUser }: Props) => {
   }
 
   const handleSubmitSignIn = (event: any) => {
-    fetch("http://localhost:3001/signin", {
+    fetch(`${serverUrl}/signin`, {
       method: 'post',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -52,7 +53,7 @@ const SignIn = ({ goHome, goSignUp, loadUser }: Props) => {
 
       const erroredFields = document.getElementsByTagName('input')
       for (let i = 0; i <= erroredFields.length; i = i + 1) {
-        if (erroredFields.item(i)?.type != 'submit')
+        if (erroredFields.item(i)?.type !== 'submit')
           erroredFields.item(i)?.classList.add('error')
       }
 
